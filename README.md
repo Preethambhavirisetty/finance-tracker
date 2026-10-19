@@ -1,277 +1,94 @@
-# Finance Tracker
+# 💰 Finance Tracker
 
-A beautiful finance tracking application with user authentication, multiple profiles, and elegant design. Built with React frontend and Python Flask backend.
+![React](https://img.shields.io/badge/React_18-20232A?logo=react&logoColor=61DAFB)
+![Flask](https://img.shields.io/badge/Flask_3-000000?logo=flask&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![CI](https://github.com/Preethambhavirisetty/finance-tracker/actions/workflows/ci.yml/badge.svg)
 
-## 🐳 Docker Deployment (NEW!)
-
-Deploy the entire application on AWS EC2 or any server with persistent storage using Docker!
-
-**Quick Start:**
-```bash
-./deploy-ec2.sh
-```
-
-**Or manually:**
-```bash
-cp env.example .env
-# Edit .env with your configuration
-docker-compose up -d
-```
-
-📖 **Full Documentation:**
-- [Docker Quick Start Guide](DOCKER-QUICKSTART.md)
-- [Complete EC2 Deployment Guide](DEPLOYMENT.md)
-
----
+A personal finance tracker with user accounts, multiple finance profiles per user, and dashboards for income, expenses, budgets and categories.
 
 ## Features
+- Register/login with hashed passwords and session-based auth
+- Multiple profiles per user, each with its own transactions
+- Income/expense tracking with categories, tags and accounts
+- Budgets manager and category breakdown on the dashboard
+- Stats cards with running balances and a filterable transaction list
+- Docker Compose stack (frontend on nginx, Flask backend, Postgres) plus `make` helpers for backups and restores
 
-### Authentication
-- User registration and login
-- Secure password hashing
-- Session-based authentication
-- Multiple user support
+## Screenshot
+<!-- Add a dashboard screenshot: docs/screenshot.png -->
+![Dashboard](docs/screenshot.png)
 
-### Finance Management
-- Multiple profiles per user
-- Track income and expenses
-- Category-based organization
-- Real-time balance calculations
-- Transaction history with filtering
-- Category breakdown visualization
+## Tech stack
+| Layer | Tech |
+|---|---|
+| Frontend | React 18 (Create React App), React Router 6, Tailwind CSS, lucide-react |
+| Backend | Flask 3, Flask-SQLAlchemy, Flask-CORS, gunicorn |
+| Database | SQLite (dev) / PostgreSQL (Docker/production) |
+| Ops | Docker, docker-compose, GitHub Actions, Render (`render.yaml`), EC2 scripts |
 
-### Design
-- Clean white background
-- Royal elegant typography (Playfair Display)
-- Smooth animations and transitions
-- Responsive design for all devices
-
-## Project Structure
-
+## Project structure
 ```
-finance-tracker/
-├── backend/
-│   ├── app.py                 # Flask application
-│   ├── requirements.txt       # Python dependencies
-│   ├── __init__.py           # Package initialization
-│   └── .gitignore            # Backend gitignore
+.
+├── backend/            # Flask app (app.py, auth.py), Dockerfile, Procfile, requirements.txt
 ├── frontend/
-│   ├── public/
-│   │   └── index.html        # HTML template
-│   ├── src/
-│   │   ├── App.js            # React application
-│   │   ├── index.js          # React entry point
-│   │   └── index.css         # Styles with custom fonts
-│   ├── package.json          # Node dependencies
-│   ├── tailwind.config.js    # Tailwind CSS configuration
-│   ├── postcss.config.js     # PostCSS configuration
-│   └── .gitignore            # Frontend gitignore
-├── start-backend.sh          # Backend startup script
-├── start-frontend.sh         # Frontend startup script
-├── README.md                 # This file
-└── .gitignore               # Root gitignore
+│   ├── src/components/ # auth, dashboard, profile, settings, layout
+│   ├── src/context/    # AuthContext
+│   ├── src/utils/      # api client, validation
+│   └── Dockerfile, nginx.conf
+├── .github/workflows/  # ci.yml, docker-build.yml
+├── docker-compose.yml  # db + backend + frontend
+├── Makefile            # build/up/down/logs/backup/restore
+├── render.yaml         # Render deployment
+└── deploy-ec2.sh, start-backend.sh, start-frontend.sh
 ```
 
-## Tech Stack
+## Getting started
 
-**Frontend:**
-- React 18 with Hooks
-- Lucide React icons
-- Tailwind CSS
-- Create React App
-
-**Backend:**
-- Python Flask
-- SQLAlchemy ORM
-- SQLite database
-- Flask-CORS for API communication
-
-## Quick Start
-
-### Prerequisites
-- Python 3.7+ and pip
-- Node.js 14+ and npm
-
-### Step 1: Start the Backend
-
-**Option A - Using the script (recommended):**
+### Option 1: Docker (recommended)
 ```bash
-chmod +x start-backend.sh
-./start-backend.sh
+git clone https://github.com/Preethambhavirisetty/finance-tracker.git
+cd finance-tracker
+cp env.example .env        # fill in values
+make build && make up      # or: docker compose up -d
 ```
+The frontend runs at http://localhost and the API at http://localhost:5001.
 
-**Option B - Manual setup:**
+### Option 2: Local dev
 ```bash
+# Backend
 cd backend
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python app.py
-```
+cp .env.example .env
+python app.py              # http://localhost:5001
 
-The backend will start on `http://localhost:5001` (Note: Port 5000 is typically used by macOS AirPlay Receiver)
-
-### Step 2: Start the Frontend
-
-Open a **new terminal** (keep the backend running):
-
-**Option A - Using the script (recommended):**
-```bash
-chmod +x start-frontend.sh
-./start-frontend.sh
-```
-
-**Option B - Manual setup:**
-```bash
+# Frontend (new terminal)
 cd frontend
+cp .env.example .env
 npm install
-npm start
+npm start                  # http://localhost:3000
 ```
 
-The frontend will start on `http://localhost:3000`
+## Environment variables
+**backend/.env**
+| Var | Example | Purpose |
+|---|---|---|
+| `SECRET_KEY` | random string | Flask session signing |
+| `DATABASE_URL` | `sqlite:///finance_tracker.db` | SQLAlchemy URL (Postgres in prod) |
+| `FLASK_ENV` | `development` | Flask mode |
+| `PORT` | `5001` | API port |
+| `CORS_ORIGINS` | `http://localhost:3000` | Allowed origins (comma-separated) |
 
-## Usage
+**frontend/.env**: `REACT_APP_API_URL=http://localhost:5001/api`
 
-### 1. Register/Login
-- Open the app in your browser at `http://localhost:3000`
-- Create a new account or login with existing credentials
-- All passwords are securely hashed in the database
+> The current README links to `DOCKER-QUICKSTART.md` and `DEPLOYMENT.md`, but neither file is in the repo. Add them or remove the links.
 
-### 2. Create a Profile
-- After logging in, create one or more finance profiles
-- Each profile tracks its own separate finances
-- Switch between profiles easily
-
-### 3. Add Transactions
-- Click "Add Transaction" to record income or expenses
-- Choose the type (income/expense)
-- Enter amount, category, date, and optional description
-- View your transactions in the dashboard
-
-### 4. Track Your Finances
-- View total income, expenses, and net balance
-- See category breakdowns
-- Review transaction history
-- Delete transactions as needed
-
-## API Endpoints
-
-### Authentication
-- `POST /api/register` - Register new user
-- `POST /api/login` - Login user
-- `POST /api/logout` - Logout user
-- `GET /api/check-auth` - Check authentication status
-
-### Profiles
-- `GET /api/profiles` - Get all profiles for current user
-- `POST /api/profiles` - Create new profile
-- `DELETE /api/profiles/<id>` - Delete profile
-
-### Transactions
-- `GET /api/profiles/<id>/transactions` - Get all transactions for profile
-- `POST /api/profiles/<id>/transactions` - Create new transaction
-- `DELETE /api/transactions/<id>` - Delete transaction
-
-### Health
-- `GET /api/health` - Health check endpoint
-
-## Database Schema
-
-### Users Table
-- `id`: Primary key
-- `username`: Unique username
-- `email`: Unique email address
-- `password_hash`: Hashed password
-- `created_at`: Account creation timestamp
-
-### Profiles Table
-- `id`: Primary key
-- `name`: Profile name
-- `user_id`: Foreign key to Users
-- `created_at`: Profile creation timestamp
-
-### Transactions Table
-- `id`: Primary key
-- `profile_id`: Foreign key to Profiles
-- `type`: 'income' or 'expense'
-- `amount`: Transaction amount
-- `category`: Transaction category
-- `description`: Optional description
-- `date`: Transaction date
-- `created_at`: Record creation timestamp
-
-## Security Features
-
-- Password hashing using Werkzeug's security functions
-- Session-based authentication
-- CORS protection
-- SQL injection prevention through SQLAlchemy ORM
-- User data isolation (users can only access their own data)
-
-## Troubleshooting
-
-### Backend issues:
-- Make sure port 5000 is not in use
-- Verify all dependencies are installed: `pip list`
-- Check if the database file has proper permissions
-- Ensure you're using Python 3.7+
-
-### Frontend issues:
-- Clear browser cache if styles don't load
-- Check browser console for errors
-- Verify the backend is running on port 5001
-- Ensure Node.js 14+ is installed
-- Run `npm install` in the frontend directory if dependencies are missing
-
-### Connection issues:
-- Ensure CORS is properly configured
-- Check that both frontend and backend are running
-- Verify API_URL in the React component matches your backend URL (default: http://localhost:5001)
-- Check browser console for CORS errors
-
-## Development
-
-### Backend Development
-```bash
-cd backend
-# Install dependencies
-pip install -r requirements.txt
-
-# Run with auto-reload
-python app.py
-```
-
-### Frontend Development
-```bash
-cd frontend
-# Install dependencies
-npm install
-
-# Start development server
-npm start
-
-# Build for production
-npm run build
-```
-
-## Environment Variables
-
-For production, set the following environment variable:
-```bash
-export SECRET_KEY='your-secret-key-here'
-```
-
-The backend uses this for session security. Change it from the default in production!
+## Contributing
+1. Fork the repo and create a branch: `git checkout -b feature/your-change`
+2. Commit using [Conventional Commits](https://www.conventionalcommits.org/) (`feat: …`, `fix: …`)
+3. Push and open a pull request against `main`
 
 ## License
-
-MIT License - Feel free to use and modify as needed!
-
-## Future Enhancements
-
-- Export transactions to CSV/PDF
-- Budget setting and tracking
-- Recurring transactions
-- Data visualization with charts
-- Email notifications
-- Multi-currency support
-- Password reset functionality
-- Two-factor authentication
+No license file yet. Add one (MIT is a common choice) via **Add file → Create new file → `LICENSE` → Choose a license template**, then update this section.
